@@ -5,39 +5,33 @@
  *  that can be found in the LICENSE file in the root of the source
  *  tree.
  */
- /* eslint-env node */
-'use strict';
+/* eslint-env node */
+import utils from '../utils';
+import filterIceServers from './filtericeservers';
+import shimRTCPeerConnection from 'rtcpeerconnection-shim';
 
-var utils = require('../utils');
-var filterIceServers = require('./filtericeservers');
-var shimRTCPeerConnection = require('rtcpeerconnection-shim');
-
-module.exports = {
+export default {
   shimGetUserMedia: require('./getusermedia'),
-  shimPeerConnection: function(window) {
-    var browserDetails = utils.detectBrowser(window);
+  shimPeerConnection(window) {
+    const browserDetails = utils.detectBrowser(window);
 
     if (window.RTCIceGatherer) {
       if (!window.RTCIceCandidate) {
-        window.RTCIceCandidate = function(args) {
-          return args;
-        };
+        window.RTCIceCandidate = args => args;
       }
       if (!window.RTCSessionDescription) {
-        window.RTCSessionDescription = function(args) {
-          return args;
-        };
+        window.RTCSessionDescription = args => args;
       }
       // this adds an additional event listener to MediaStrackTrack that signals
       // when a tracks enabled property was changed. Workaround for a bug in
       // addStream, see below. No longer required in 15025+
       if (browserDetails.version < 15025) {
-        var origMSTEnabled = Object.getOwnPropertyDescriptor(
+        const origMSTEnabled = Object.getOwnPropertyDescriptor(
             window.MediaStreamTrack.prototype, 'enabled');
         Object.defineProperty(window.MediaStreamTrack.prototype, 'enabled', {
-          set: function(value) {
+          set(value) {
             origMSTEnabled.set.call(this, value);
-            var ev = new Event('enabled');
+            const ev = new Event('enabled');
             ev.enabled = value;
             this.dispatchEvent(ev);
           }
@@ -49,7 +43,7 @@ module.exports = {
     // https://github.com/w3c/ortc/issues/714
     if (window.RTCRtpSender && !('dtmf' in window.RTCRtpSender.prototype)) {
       Object.defineProperty(window.RTCRtpSender.prototype, 'dtmf', {
-        get: function() {
+        get() {
           if (this._dtmf === undefined) {
             if (this.track.kind === 'audio') {
               this._dtmf = new window.RTCDtmfSender(this);
@@ -67,9 +61,9 @@ module.exports = {
       window.RTCDTMFSender = window.RTCDtmfSender;
     }
 
-    var RTCPeerConnectionShim = shimRTCPeerConnection(window,
+    const RTCPeerConnectionShim = shimRTCPeerConnection(window,
         browserDetails.version);
-    window.RTCPeerConnection = function(config) {
+    window.RTCPeerConnection = config => {
       if (config && config.iceServers) {
         config.iceServers = filterIceServers(config.iceServers);
       }
@@ -77,7 +71,7 @@ module.exports = {
     };
     window.RTCPeerConnection.prototype = RTCPeerConnectionShim.prototype;
   },
-  shimReplaceTrack: function(window) {
+  shimReplaceTrack(window) {
     // ORTC has replaceTrack -- https://github.com/w3c/ortc/issues/614
     if (window.RTCRtpSender &&
         !('replaceTrack' in window.RTCRtpSender.prototype)) {
