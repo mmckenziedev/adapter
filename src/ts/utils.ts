@@ -120,7 +120,7 @@ export function disableWarnings(bool: boolean) {
   return `adapter.js deprecation warnings ${bool ? "disabled" : "enabled"}`;
 }
 
-export function log() {
+export function log(...args: any[]) {
   if (typeof window === "object") {
     if (logDisabled_) {
       return;

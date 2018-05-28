@@ -9,19 +9,43 @@
 
 import utils = require("./utils");
 
+import { BrowserResult } from "./utils";
+import commonShim from "./common_shim";
+import chromeShim from "./chrome/chrome_shim";
+
+interface Adapter {
+  browserDetails: BrowserResult;
+  commonShim: typeof commonShim;
+  extractVersion: typeof utils.extractVersion;
+  disableLog: typeof utils.disableLog;
+  disableWarnings: typeof utils.disableWarnings;
+  browserShim?: typeof chromeShim;
+}
+
+interface Dependencies {
+  window: Window;
+}
+
+interface Options {
+  shimChrome?: boolean,
+  shimFirefox?: boolean,
+  shimEdge?: boolean,
+  shimSafari?: boolean,
+}
+
 // Shimming starts here.
-export = function(dependencies, opts) {
+export = function(dependencies:Dependencies, opts: Options) {
   const window = dependencies && dependencies.window;
 
   const options = {
     shimChrome: true,
     shimFirefox: true,
     shimEdge: true,
-    shimSafari: true,
+    shimSafari: true
   };
 
   for (const key in opts) {
-    if (hasOwnProperty.call(opts, key)) {
+    if (Object.prototype.hasOwnProperty.call(opts, key)) {
       options[key] = opts[key];
     }
   }
@@ -37,14 +61,14 @@ export = function(dependencies, opts) {
   // require('./utils').disableLog(false);
 
   // Browser shims.
-  const chromeShim = require('./chrome/chrome_shim') || null;
-  const edgeShim = require('./edge/edge_shim') || null;
-  const firefoxShim = require('./firefox/firefox_shim') || null;
-  const safariShim = require('./safari/safari_shim') || null;
-  const commonShim = require('./common_shim') || null;
+  const chromeShim = require("./chrome/chrome_shim") || null;
+  const edgeShim = require("./edge/edge_shim") || null;
+  const firefoxShim = require("./firefox/firefox_shim") || null;
+  const safariShim = require("./safari/safari_shim") || null;
+  const commonShim = require("./common_shim") || null;
 
   // Export to the adapter global object visible in the browser.
-  const adapter = {
+  const adapter: Adapter = {
     browserDetails,
     commonShim,
     extractVersion: utils.extractVersion,
@@ -54,13 +78,16 @@ export = function(dependencies, opts) {
 
   // Shim browser if found.
   switch (browserDetails.browser) {
-    case 'chrome':
-      if (!chromeShim || !chromeShim.shimPeerConnection ||
-          !options.shimChrome) {
-        logging('Chrome shim is not included in this adapter release.');
+    case "chrome":
+      if (
+        !chromeShim ||
+        !chromeShim.shimPeerConnection ||
+        !options.shimChrome
+      ) {
+        logging("Chrome shim is not included in this adapter release.");
         return adapter;
       }
-      logging('adapter.js shimming chrome.');
+      logging("adapter.js shimming chrome.");
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = chromeShim;
       commonShim.shimCreateObjectURL(window);
@@ -78,13 +105,16 @@ export = function(dependencies, opts) {
       commonShim.shimMaxMessageSize(window);
       commonShim.shimSendThrowTypeError(window);
       break;
-    case 'firefox':
-      if (!firefoxShim || !firefoxShim.shimPeerConnection ||
-          !options.shimFirefox) {
-        logging('Firefox shim is not included in this adapter release.');
+    case "firefox":
+      if (
+        !firefoxShim ||
+        !firefoxShim.shimPeerConnection ||
+        !options.shimFirefox
+      ) {
+        logging("Firefox shim is not included in this adapter release.");
         return adapter;
       }
-      logging('adapter.js shimming firefox.');
+      logging("adapter.js shimming firefox.");
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = firefoxShim;
       commonShim.shimCreateObjectURL(window);
@@ -102,12 +132,12 @@ export = function(dependencies, opts) {
       commonShim.shimMaxMessageSize(window);
       commonShim.shimSendThrowTypeError(window);
       break;
-    case 'edge':
+    case "edge":
       if (!edgeShim || !edgeShim.shimPeerConnection || !options.shimEdge) {
-        logging('MS edge shim is not included in this adapter release.');
+        logging("MS edge shim is not included in this adapter release.");
         return adapter;
       }
-      logging('adapter.js shimming edge.');
+      logging("adapter.js shimming edge.");
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = edgeShim;
       commonShim.shimCreateObjectURL(window);
@@ -121,12 +151,12 @@ export = function(dependencies, opts) {
       commonShim.shimMaxMessageSize(window);
       commonShim.shimSendThrowTypeError(window);
       break;
-    case 'safari':
+    case "safari":
       if (!safariShim || !options.shimSafari) {
-        logging('Safari shim is not included in this adapter release.');
+        logging("Safari shim is not included in this adapter release.");
         return adapter;
       }
-      logging('adapter.js shimming safari.');
+      logging("adapter.js shimming safari.");
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = safariShim;
       commonShim.shimCreateObjectURL(window);
@@ -144,9 +174,9 @@ export = function(dependencies, opts) {
       commonShim.shimSendThrowTypeError(window);
       break;
     default:
-      logging('Unsupported browser!');
+      logging("Unsupported browser!");
       break;
   }
 
   return adapter;
-}
+};
