@@ -17,42 +17,62 @@ let deprecationWarnings_ = true;
  * @param {!number} pos position in the version string to be returned.
  * @return {!number} browser version.
  */
-function extractVersion(uastring, expr, pos) {
+export function extractVersion(
+  uastring: string,
+  expr: RegExp,
+  pos: number
+): number | null {
   const match = uastring.match(expr);
-  return match && match.length >= pos && parseInt(match[pos], 10);
+
+  if (match !== null && match.length >= pos) {
+    return parseInt(match[pos], 10);
+  } else {
+    return null;
+  }
 }
 
 // Wraps the peerconnection event eventNameToWrap in a function
 // which returns the modified event object.
-function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
+export function wrapPeerConnectionEvent(
+  window: Window,
+  eventNameToWrap: string,
+  wrapper: Function
+) {
   if (!window.RTCPeerConnection) {
     return;
   }
   const proto = window.RTCPeerConnection.prototype;
   const nativeAddEventListener = proto.addEventListener;
-  proto.addEventListener = function(nativeEventName, cb) {
+  proto.addEventListener = function(nativeEventName: string, cb: Function) {
     if (nativeEventName !== eventNameToWrap) {
       return nativeAddEventListener.apply(this, arguments);
     }
-    const wrappedCallback = e => {
+    const wrappedCallback = (e: Event) => {
       cb(wrapper(e));
     };
     this._eventMap = this._eventMap || {};
     this._eventMap[cb] = wrappedCallback;
-    return nativeAddEventListener.apply(this, [nativeEventName,
-      wrappedCallback]);
+    return nativeAddEventListener.apply(this, [
+      nativeEventName,
+      wrappedCallback
+    ]);
   };
 
   const nativeRemoveEventListener = proto.removeEventListener;
-  proto.removeEventListener = function(nativeEventName, cb) {
-    if (nativeEventName !== eventNameToWrap || !this._eventMap
-        || !this._eventMap[cb]) {
+  proto.removeEventListener = function(nativeEventName: string, cb: Function) {
+    if (
+      nativeEventName !== eventNameToWrap ||
+      !this._eventMap ||
+      !this._eventMap[cb]
+    ) {
       return nativeRemoveEventListener.apply(this, arguments);
     }
     const unwrappedCb = this._eventMap[cb];
     delete this._eventMap[cb];
-    return nativeRemoveEventListener.apply(this, [nativeEventName,
-      unwrappedCb]);
+    return nativeRemoveEventListener.apply(this, [
+      nativeEventName,
+      unwrappedCb
+    ]);
   };
 
   Object.defineProperty(proto, `on${eventNameToWrap}`, {
@@ -61,13 +81,17 @@ function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
     },
     set(cb) {
       if (this[`_on${eventNameToWrap}`]) {
-        this.removeEventListener(eventNameToWrap,
-            this[`_on${eventNameToWrap}`]);
+        this.removeEventListener(
+          eventNameToWrap,
+          this[`_on${eventNameToWrap}`]
+        );
         delete this[`_on${eventNameToWrap}`];
       }
       if (cb) {
-        this.addEventListener(eventNameToWrap,
-            this[`_on${eventNameToWrap}`] = cb);
+        this.addEventListener(
+          eventNameToWrap,
+          (this[`_on${eventNameToWrap}`] = cb)
+        );
       }
     },
     enumerable: true,
@@ -76,96 +100,112 @@ function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
 }
 
 // Utility methods.
-export = {
-  extractVersion,
-  wrapPeerConnectionEvent,
-  disableLog(bool) {
-    if (typeof bool !== 'boolean') {
-      return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
-    }
-    logDisabled_ = bool;
-    return (bool) ? 'adapter.js logging disabled' :
-        'adapter.js logging enabled';
-  },
+export function disableLog(bool: boolean) {
+  if (typeof bool !== "boolean") {
+    return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
+  }
+  logDisabled_ = bool;
+  return bool ? "adapter.js logging disabled" : "adapter.js logging enabled";
+}
 
-  /**
-   * Disable or enable deprecation warnings
-   * @param {!boolean} bool set to true to disable warnings.
-   */
-  disableWarnings(bool) {
-    if (typeof bool !== 'boolean') {
-      return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
-    }
-    deprecationWarnings_ = !bool;
-    return `adapter.js deprecation warnings ${bool ? 'disabled' : 'enabled'}`;
-  },
+/**
+ * Disable or enable deprecation warnings
+ * @param {!boolean} bool set to true to disable warnings.
+ */
+export function disableWarnings(bool: boolean) {
+  if (typeof bool !== "boolean") {
+    return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
+  }
+  deprecationWarnings_ = !bool;
+  return `adapter.js deprecation warnings ${bool ? "disabled" : "enabled"}`;
+}
 
-  log() {
-    if (typeof window === 'object') {
-      if (logDisabled_) {
-        return;
-      }
-      if (typeof console !== 'undefined' && typeof console.log === 'function') {
-        console.log.apply(console, arguments);
-      }
-    }
-  },
-
-  /**
-   * Shows a deprecation warning suggesting the modern and spec-compatible API.
-   */
-  deprecated(oldMethod, newMethod) {
-    if (!deprecationWarnings_) {
+export function log() {
+  if (typeof window === "object") {
+    if (logDisabled_) {
       return;
     }
-    console.warn(`${oldMethod} is deprecated, please use ${newMethod} instead.`);
-  },
-
-  /**
-   * Browser detector.
-   *
-   * @return {object} result containing browser and version
-   *     properties.
-   */
-  detectBrowser(window) {
-    const navigator = window && window.navigator;
-
-    // Returned result object.
-    const result = {};
-    result.browser = null;
-    result.version = null;
-
-    // Fail early if it's not a browser
-    if (typeof window === 'undefined' || !window.navigator) {
-      result.browser = 'Not a browser.';
-      return result;
+    if (typeof console !== "undefined" && typeof console.log === "function") {
+      console.log.apply(console, arguments);
     }
+  }
+}
 
-    if (navigator.mozGetUserMedia) { // Firefox.
-      result.browser = 'firefox';
-      result.version = extractVersion(navigator.userAgent,
-          /Firefox\/(\d+)\./, 1);
-    } else if (navigator.webkitGetUserMedia) {
-      // Chrome, Chromium, Webview, Opera.
-      // Version matches Chrome/WebRTC version.
-      result.browser = 'chrome';
-      result.version = extractVersion(navigator.userAgent,
-          /Chrom(e|ium)\/(\d+)\./, 2);
-    } else if (navigator.mediaDevices &&
-        navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) { // Edge.
-      result.browser = 'edge';
-      result.version = extractVersion(navigator.userAgent,
-          /Edge\/(\d+).(\d+)$/, 2);
-    } else if (window.RTCPeerConnection &&
-        navigator.userAgent.match(/AppleWebKit\/(\d+)\./)) { // Safari.
-      result.browser = 'safari';
-      result.version = extractVersion(navigator.userAgent,
-          /AppleWebKit\/(\d+)\./, 1);
-    } else { // Default fallthrough: not supported.
-      result.browser = 'Not a supported browser.';
-      return result;
-    }
+/**
+ * Shows a deprecation warning suggesting the modern and spec-compatible API.
+ */
+export function deprecated(oldMethod, newMethod) {
+  if (!deprecationWarnings_) {
+    return;
+  }
+  console.warn(`${oldMethod} is deprecated, please use ${newMethod} instead.`);
+}
 
+export interface BrowserResult {
+  browser: string | null;
+  version: number | null;
+}
+
+/**
+ * Browser detector.
+ *
+ * @return {object} result containing browser and version
+ *     properties.
+ */
+export function detectBrowser(window: Window) {
+  const navigator = window && window.navigator;
+
+  // Returned result object.
+  const result: BrowserResult = {} as BrowserResult;
+  result.browser = null;
+  result.version = null;
+
+  // Fail early if it's not a browser
+  if (typeof window === "undefined" || !window.navigator) {
+    result.browser = "Not a browser.";
     return result;
   }
-};
+
+  if (navigator.mozGetUserMedia) {
+    // Firefox.
+    result.browser = "firefox";
+    result.version = extractVersion(navigator.userAgent, /Firefox\/(\d+)\./, 1);
+  } else if (navigator.webkitGetUserMedia) {
+    // Chrome, Chromium, Webview, Opera.
+    // Version matches Chrome/WebRTC version.
+    result.browser = "chrome";
+    result.version = extractVersion(
+      navigator.userAgent,
+      /Chrom(e|ium)\/(\d+)\./,
+      2
+    );
+  } else if (
+    navigator.mediaDevices &&
+    navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)
+  ) {
+    // Edge.
+    result.browser = "edge";
+    result.version = extractVersion(
+      navigator.userAgent,
+      /Edge\/(\d+).(\d+)$/,
+      2
+    );
+  } else if (
+    window.RTCPeerConnection &&
+    navigator.userAgent.match(/AppleWebKit\/(\d+)\./)
+  ) {
+    // Safari.
+    result.browser = "safari";
+    result.version = extractVersion(
+      navigator.userAgent,
+      /AppleWebKit\/(\d+)\./,
+      1
+    );
+  } else {
+    // Default fallthrough: not supported.
+    result.browser = "Not a supported browser.";
+    return result;
+  }
+
+  return result;
+}
