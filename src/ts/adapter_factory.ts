@@ -34,7 +34,7 @@ interface Options {
 }
 
 // Shimming starts here.
-export = function(dependencies:Dependencies, opts: Options) {
+export = function(dependencies:Dependencies, opts?: Options) {
   const window = dependencies && dependencies.window;
 
   const options = {
