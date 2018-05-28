@@ -34,7 +34,7 @@ export function extractVersion(
 // Wraps the peerconnection event eventNameToWrap in a function
 // which returns the modified event object.
 export function wrapPeerConnectionEvent(
-  window: Window,
+  window: any,
   eventNameToWrap: string,
   wrapper: Function
 ) {

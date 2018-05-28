@@ -868,8 +868,7 @@ export function shimPeerConnection(window) {
     ["setLocalDescription", "setRemoteDescription", "addIceCandidate"].forEach(
       method => {
         const nativeMethod = window.RTCPeerConnection.prototype[method];
-        window.RTCPeerConnection.prototype[method] = function() {
-          const args = arguments;
+        window.RTCPeerConnection.prototype[method] = function(...args) {
           const pc = this;
           const promise = new Promise((resolve, reject) => {
             nativeMethod.apply(pc, [args[0], resolve, reject]);

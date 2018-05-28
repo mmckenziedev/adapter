@@ -166,7 +166,7 @@ export function shimMaxMessageSize(window) {
     return version !== version ? -1 : version;
   };
 
-  const getCanSendMaxMessageSize = remoteIsFirefox => {
+  const getCanSendMaxMessageSize = (remoteIsFirefox: number) => {
     // Every implementation we know can send at least 64 KiB.
     // Note: Although Chrome is technically able to send up to 256 KiB, the
     //       data does not reach the other peer reliably.
@@ -197,7 +197,7 @@ export function shimMaxMessageSize(window) {
     return canSendMaxMessageSize;
   };
 
-  const getMaxMessageSize = (description, remoteIsFirefox) => {
+  const getMaxMessageSize = (description: RTCSessionDescription, remoteIsFirefox: number) => {
     // Note: 65536 bytes is the default value from the SDP spec. Also,
     //       every implementation we know supports receiving 65536 bytes.
     let maxMessageSize = 65536;
