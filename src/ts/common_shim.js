@@ -78,7 +78,8 @@ module.exports = {
 
     var nativeCreateObjectURL = URL.createObjectURL.bind(URL);
     var nativeRevokeObjectURL = URL.revokeObjectURL.bind(URL);
-    var streams = new Map(), newId = 0;
+    var streams = new Map();
+    var newId = 0;
 
     URL.createObjectURL = function(stream) {
       if ('getTracks' in stream) {
