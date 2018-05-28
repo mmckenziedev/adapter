@@ -6,11 +6,11 @@
  *  tree.
  */
 /* eslint-env node */
-import utils from '../utils';
-import filterIceServers from './filtericeservers';
-import shimRTCPeerConnection from 'rtcpeerconnection-shim';
+import utils = require("../utils");
+import filterIceServers = require("./filtericeservers");
+import shimRTCPeerConnection = require("rtcpeerconnection-shim");
 
-export default {
+export = {
   shimGetUserMedia: require('./getusermedia'),
   shimPeerConnection(window) {
     const browserDetails = utils.detectBrowser(window);

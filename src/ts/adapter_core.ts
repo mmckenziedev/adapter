@@ -7,5 +7,5 @@
  */
 /* eslint-env node */
 
-import adapterFactory from './adapter_factory.js';
-export default adapterFactory({window: global.window});
+import adapterFactory = require("./adapter_factory.js");
+export = adapterFactory({window: global.window});

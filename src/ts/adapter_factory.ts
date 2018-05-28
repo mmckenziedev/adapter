@@ -7,10 +7,10 @@
  */
 /* eslint-env node */
 
-import utils from './utils';
+import utils = require("./utils");
 
 // Shimming starts here.
-export default function(dependencies, opts) {
+export = function(dependencies, opts) {
   const window = dependencies && dependencies.window;
 
   const options = {

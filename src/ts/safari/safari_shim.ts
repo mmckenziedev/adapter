@@ -5,9 +5,9 @@
  *  that can be found in the LICENSE file in the root of the source
  *  tree.
  */
-import utils from '../utils';
+import utils = require("../utils");
 
-export default {
+export = {
   shimLocalStreamsAPI(window) {
     if (typeof window !== 'object' || !window.RTCPeerConnection) {
       return;

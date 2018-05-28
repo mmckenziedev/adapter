@@ -7,7 +7,7 @@
  *  tree.
  */
 /* eslint-env node */
-import utils from '../utils.js';
+import utils = require("../utils.js");
 const logging = utils.log;
 
 /* iterates the stats graph recursively. */
@@ -51,7 +51,7 @@ function filterStats(result, track, outbound) {
   return filteredResult;
 }
 
-export default {
+export = {
   shimGetUserMedia: require('./getusermedia'),
   shimMediaStream(window) {
     window.MediaStream = window.MediaStream || window.webkitMediaStream;

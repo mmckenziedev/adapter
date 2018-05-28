@@ -6,9 +6,9 @@
  *  tree.
  */
 /* eslint-env node */
-import utils from '../utils';
+import utils = require("../utils");
 
-export default {
+export = {
   shimGetUserMedia: require('./getusermedia'),
   shimOnTrack(window) {
     if (typeof window === 'object' && window.RTCPeerConnection && !('ontrack' in

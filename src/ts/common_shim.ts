@@ -6,10 +6,10 @@
  *  tree.
  */
 /* eslint-env node */
-import SDPUtils from 'sdp';
-import utils from './utils';
+import SDPUtils = require("sdp");
+import utils = require("./utils");
 
-export default {
+export = {
   shimRTCIceCandidate(window) {
     // foundation is arbitrarily chosen as an indicator for full support for
     // https://w3c.github.io/webrtc-pc/#rtcicecandidate-interface

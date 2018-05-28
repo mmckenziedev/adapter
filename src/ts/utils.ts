@@ -76,7 +76,7 @@ function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
 }
 
 // Utility methods.
-export default {
+export = {
   extractVersion,
   wrapPeerConnectionEvent,
   disableLog(bool) {

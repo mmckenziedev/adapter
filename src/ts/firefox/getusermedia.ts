@@ -6,11 +6,11 @@
  *  tree.
  */
 /* eslint-env node */
-import utils from '../utils';
+import utils = require("../utils");
 const logging = utils.log;
 
 // Expose public methods.
-export default function(window) {
+export = function(window) {
   const browserDetails = utils.detectBrowser(window);
   const navigator = window && window.navigator;
   const MediaStreamTrack = window && window.MediaStreamTrack;

@@ -7,7 +7,7 @@
  */
 /* eslint-env node */
 // Expose public methods.
-export default function(window) {
+export = function(window) {
   const navigator = window && window.navigator;
 
   const shimError_ = e => ({

@@ -6,14 +6,14 @@
  *  tree.
  */
 /* eslint-env node */
-import utils from '../utils';
+import utils = require("../utils");
 
 // Edge does not like
 // 1) stun: filtered after 14393 unless ?transport=udp is present
 // 2) turn: that does not have all of turn:host:port?transport=udp
 // 3) turn: with ipv6 addresses
 // 4) turn: occurring muliple times
-export default function(iceServers, edgeVersion) {
+export = function(iceServers, edgeVersion) {
   let hasTurn = false;
   iceServers = JSON.parse(JSON.stringify(iceServers));
   return iceServers.filter(server => {
