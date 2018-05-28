@@ -9,6 +9,20 @@
 import utils = require("../utils.js");
 const logging = utils.log;
 
+const Errors: {[s:string]: string} = {
+  PermissionDeniedError: 'NotAllowedError',
+  PermissionDismissedError: 'NotAllowedError',
+  InvalidStateError: 'NotAllowedError',
+  DevicesNotFoundError: 'NotFoundError',
+  ConstraintNotSatisfiedError: 'OverconstrainedError',
+  TrackStartError: 'NotReadableError',
+  MediaDeviceFailedDueToShutdown: 'NotAllowedError',
+  MediaDeviceKillSwitchOn: 'NotAllowedError',
+  TabCaptureError: 'AbortError',
+  ScreenCaptureError: 'AbortError',
+  DeviceCaptureError: 'AbortError'
+};
+
 // Expose public methods.
 export = function(window) {
   const browserDetails = utils.detectBrowser(window);
@@ -125,20 +139,8 @@ export = function(window) {
     return func(constraints);
   };
 
-  const shimError_ = e => ({
-    name: {
-      PermissionDeniedError: 'NotAllowedError',
-      PermissionDismissedError: 'NotAllowedError',
-      InvalidStateError: 'NotAllowedError',
-      DevicesNotFoundError: 'NotFoundError',
-      ConstraintNotSatisfiedError: 'OverconstrainedError',
-      TrackStartError: 'NotReadableError',
-      MediaDeviceFailedDueToShutdown: 'NotAllowedError',
-      MediaDeviceKillSwitchOn: 'NotAllowedError',
-      TabCaptureError: 'AbortError',
-      ScreenCaptureError: 'AbortError',
-      DeviceCaptureError: 'AbortError'
-    }[e.name] || e.name,
+  const shimError_ = (e: Error) => ({
+    name: Errors[e.name] || e.name,
 
     message: e.message,
     constraint: e.constraintName,
