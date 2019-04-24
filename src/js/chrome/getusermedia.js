@@ -172,17 +172,26 @@ export function shimGetUserMedia(window) {
   // function which returns a Promise, it does not accept spec-style
   // constraints.
   if (navigator.mediaDevices.getUserMedia) {
-    const origGetUserMedia = navigator.mediaDevices.getUserMedia.
-        bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = cs => shimConstraints_(cs, c => origGetUserMedia(c).then(stream => {
-      if (c.audio && !stream.getAudioTracks().length ||
-          c.video && !stream.getVideoTracks().length) {
-        stream.getTracks().forEach(track => {
-          track.stop();
-        });
-        throw new DOMException('', 'NotFoundError');
-      }
-      return stream;
-    }, e => Promise.reject(shimError_(e))));
+    const origGetUserMedia = navigator.mediaDevices.getUserMedia.bind(
+      navigator.mediaDevices
+    );
+    navigator.mediaDevices.getUserMedia = cs =>
+      shimConstraints_(cs, c =>
+        origGetUserMedia(c).then(
+          stream => {
+            if (
+              (c.audio && !stream.getAudioTracks().length) ||
+              (c.video && !stream.getVideoTracks().length)
+            ) {
+              stream.getTracks().forEach(track => {
+                track.stop();
+              });
+              throw new DOMException('', 'NotFoundError');
+            }
+            return stream;
+          },
+          e => Promise.reject(shimError_(e))
+        )
+      );
   }
 }

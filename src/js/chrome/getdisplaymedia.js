@@ -22,12 +22,12 @@ export function shimGetDisplayMedia(window, getSourceId) {
         'a function');
     return;
   }
-  window.navigator.mediaDevices.getDisplayMedia = constraints => getSourceId(constraints)
-    .then(sourceId => {
+  window.navigator.mediaDevices.getDisplayMedia = constraints =>
+    getSourceId(constraints).then(sourceId => {
       const widthSpecified = constraints.video && constraints.video.width;
       const heightSpecified = constraints.video && constraints.video.height;
-      const frameRateSpecified = constraints.video &&
-        constraints.video.frameRate;
+      const frameRateSpecified =
+        constraints.video && constraints.video.frameRate;
       constraints.video = {
         mandatory: {
           chromeMediaSource: 'desktop',

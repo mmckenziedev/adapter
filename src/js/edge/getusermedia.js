@@ -22,7 +22,9 @@ export function shimGetUserMedia(window) {
   });
 
   // getUserMedia error shim.
-  const origGetUserMedia = navigator.mediaDevices.getUserMedia.
-      bind(navigator.mediaDevices);
-  navigator.mediaDevices.getUserMedia = c => origGetUserMedia(c).catch(e => Promise.reject(shimError_(e)));
+  const origGetUserMedia = navigator.mediaDevices.getUserMedia.bind(
+    navigator.mediaDevices
+  );
+  navigator.mediaDevices.getUserMedia = c =>
+    origGetUserMedia(c).catch(e => Promise.reject(shimError_(e)));
 }

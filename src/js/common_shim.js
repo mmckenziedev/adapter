@@ -213,9 +213,16 @@ export function shimSendThrowTypeError(window) {
     dc.send = function() {
       const data = arguments[0];
       const length = data.length || data.size || data.byteLength;
-      if (dc.readyState === 'open' &&
-          pc.sctp && length > pc.sctp.maxMessageSize) {
-        throw new TypeError(`Message too large (can send a maximum of ${pc.sctp.maxMessageSize} bytes)`);
+      if (
+        dc.readyState === 'open' &&
+        pc.sctp &&
+        length > pc.sctp.maxMessageSize
+      ) {
+        throw new TypeError(
+          `Message too large (can send a maximum of ${
+            pc.sctp.maxMessageSize
+          } bytes)`
+        );
       }
       return origDataChannelSend.apply(dc, arguments);
     };
@@ -309,7 +316,10 @@ export function removeAllowExtmapMixed(window) {
   const nativeSRD = window.RTCPeerConnection.prototype.setRemoteDescription;
   window.RTCPeerConnection.prototype.setRemoteDescription = function(desc) {
     if (desc && desc.sdp && desc.sdp.indexOf('\na=extmap-allow-mixed') !== -1) {
-      desc.sdp = desc.sdp.split('\n').filter(line => line.trim() !== 'a=extmap-allow-mixed').join('\n');
+      desc.sdp = desc.sdp
+        .split('\n')
+        .filter(line => line.trim() !== 'a=extmap-allow-mixed')
+        .join('\n');
     }
     return nativeSRD.apply(this, arguments);
   };

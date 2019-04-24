@@ -193,7 +193,8 @@ export function shimGetUserMedia(window) {
     // shim not needed in Safari 12.1
     const mediaDevices = navigator.mediaDevices;
     const _getUserMedia = mediaDevices.getUserMedia.bind(mediaDevices);
-    navigator.mediaDevices.getUserMedia = constraints => _getUserMedia(shimConstraints(constraints));
+    navigator.mediaDevices.getUserMedia = constraints =>
+      _getUserMedia(shimConstraints(constraints));
   }
 
   if (!navigator.getUserMedia && navigator.mediaDevices &&

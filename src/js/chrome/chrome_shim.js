@@ -230,7 +230,8 @@ export function shimGetStats(window) {
     };
 
     // shim getStats with maplike support
-    const makeMapStats = stats => new Map(Object.keys(stats).map(key => [key, stats[key]]));
+    const makeMapStats = stats =>
+      new Map(Object.keys(stats).map(key => [key, stats[key]]));
 
     if (arguments.length >= 2) {
       const successCallbackWrapper_ = response => {
