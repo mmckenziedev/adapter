@@ -215,8 +215,7 @@ export function shimSendThrowTypeError(window) {
       const length = data.length || data.size || data.byteLength;
       if (dc.readyState === 'open' &&
           pc.sctp && length > pc.sctp.maxMessageSize) {
-        throw new TypeError('Message too large (can send a maximum of ' +
-          pc.sctp.maxMessageSize + ' bytes)');
+        throw new TypeError(`Message too large (can send a maximum of ${pc.sctp.maxMessageSize} bytes)`);
       }
       return origDataChannelSend.apply(dc, arguments);
     };

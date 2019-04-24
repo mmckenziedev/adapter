@@ -61,19 +61,19 @@ export function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
       unwrappedCb]);
   };
 
-  Object.defineProperty(proto, 'on' + eventNameToWrap, {
+  Object.defineProperty(proto, `on${eventNameToWrap}`, {
     get() {
-      return this['_on' + eventNameToWrap];
+      return this[`_on${eventNameToWrap}`];
     },
     set(cb) {
-      if (this['_on' + eventNameToWrap]) {
+      if (this[`_on${eventNameToWrap}`]) {
         this.removeEventListener(eventNameToWrap,
-            this['_on' + eventNameToWrap]);
-        delete this['_on' + eventNameToWrap];
+            this[`_on${eventNameToWrap}`]);
+        delete this[`_on${eventNameToWrap}`];
       }
       if (cb) {
         this.addEventListener(eventNameToWrap,
-            this['_on' + eventNameToWrap] = cb);
+            this[`_on${eventNameToWrap}`] = cb);
       }
     },
     enumerable: true,
@@ -83,8 +83,7 @@ export function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
 
 export function disableLog(bool) {
   if (typeof bool !== 'boolean') {
-    return new Error('Argument type: ' + typeof bool +
-        '. Please use a boolean.');
+    return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
   }
   logDisabled_ = bool;
   return (bool) ? 'adapter.js logging disabled' :
@@ -97,11 +96,10 @@ export function disableLog(bool) {
  */
 export function disableWarnings(bool) {
   if (typeof bool !== 'boolean') {
-    return new Error('Argument type: ' + typeof bool +
-        '. Please use a boolean.');
+    return new Error(`Argument type: ${typeof bool}. Please use a boolean.`);
   }
   deprecationWarnings_ = !bool;
-  return 'adapter.js deprecation warnings ' + (bool ? 'disabled' : 'enabled');
+  return `adapter.js deprecation warnings ${bool ? 'disabled' : 'enabled'}`;
 }
 
 export function log() {
@@ -122,8 +120,7 @@ export function deprecated(oldMethod, newMethod) {
   if (!deprecationWarnings_) {
     return;
   }
-  console.warn(oldMethod + ' is deprecated, please use ' + newMethod +
-      ' instead.');
+  console.warn(`${oldMethod} is deprecated, please use ${newMethod} instead.`);
 }
 
 /**

@@ -120,14 +120,14 @@ export function shimGetUserMedia(window) {
                                                         {ideal: dev.deviceId};
             }
             constraints.video = constraintsToChrome_(constraints.video);
-            logging('chrome: ' + JSON.stringify(constraints));
+            logging(`chrome: ${JSON.stringify(constraints)}`);
             return func(constraints);
           });
         }
       }
       constraints.video = constraintsToChrome_(constraints.video);
     }
-    logging('chrome: ' + JSON.stringify(constraints));
+    logging(`chrome: ${JSON.stringify(constraints)}`);
     return func(constraints);
   };
 
