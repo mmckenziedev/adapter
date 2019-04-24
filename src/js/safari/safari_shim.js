@@ -104,7 +104,7 @@ export function shimRemoteStreamsAPI(window) {
     window.RTCPeerConnection.prototype.setRemoteDescription = function() {
       const pc = this;
       if (!this._onaddstreampoly) {
-        this.addEventListener('track', this._onaddstreampoly = function(e) {
+        this.addEventListener('track', this._onaddstreampoly = e => {
           e.streams.forEach(stream => {
             if (!pc._remoteStreams) {
               pc._remoteStreams = [];
@@ -193,17 +193,15 @@ export function shimGetUserMedia(window) {
     // shim not needed in Safari 12.1
     const mediaDevices = navigator.mediaDevices;
     const _getUserMedia = mediaDevices.getUserMedia.bind(mediaDevices);
-    navigator.mediaDevices.getUserMedia = (constraints) => {
-      return _getUserMedia(shimConstraints(constraints));
-    };
+    navigator.mediaDevices.getUserMedia = constraints => _getUserMedia(shimConstraints(constraints));
   }
 
   if (!navigator.getUserMedia && navigator.mediaDevices &&
     navigator.mediaDevices.getUserMedia) {
-    navigator.getUserMedia = function(constraints, cb, errcb) {
+    navigator.getUserMedia = ((constraints, cb, errcb) => {
       navigator.mediaDevices.getUserMedia(constraints)
       .then(cb, errcb);
-    }.bind(navigator);
+    }).bind(navigator);
   }
 }
 
@@ -221,7 +219,7 @@ export function shimConstraints(constraints) {
 export function shimRTCIceServerUrls(window) {
   // migrate from non-spec RTCIceServer.url to RTCIceServer.urls
   const OrigPeerConnection = window.RTCPeerConnection;
-  window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+  window.RTCPeerConnection = (pcConfig, pcConstraints) => {
     if (pcConfig && pcConfig.iceServers) {
       const newIceServers = [];
       for (let i = 0; i < pcConfig.iceServers.length; i++) {

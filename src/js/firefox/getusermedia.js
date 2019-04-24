@@ -15,7 +15,7 @@ export function shimGetUserMedia(window) {
   const navigator = window && window.navigator;
   const MediaStreamTrack = window && window.MediaStreamTrack;
 
-  navigator.getUserMedia = function(constraints, onSuccess, onError) {
+  navigator.getUserMedia = (constraints, onSuccess, onError) => {
     // Replace Firefox 44+'s deprecation warning with unprefixed version.
     utils.deprecated('navigator.getUserMedia',
         'navigator.mediaDevices.getUserMedia');
@@ -24,7 +24,7 @@ export function shimGetUserMedia(window) {
 
   if (!(browserDetails.version > 55 &&
       'autoGainControl' in navigator.mediaDevices.getSupportedConstraints())) {
-    const remap = function(obj, a, b) {
+    const remap = (obj, a, b) => {
       if (a in obj && !(b in obj)) {
         obj[b] = obj[a];
         delete obj[a];
@@ -33,7 +33,7 @@ export function shimGetUserMedia(window) {
 
     const nativeGetUserMedia = navigator.mediaDevices.getUserMedia.
         bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(c) {
+    navigator.mediaDevices.getUserMedia = c => {
       if (typeof c === 'object' && typeof c.audio === 'object') {
         c = JSON.parse(JSON.stringify(c));
         remap(c.audio, 'autoGainControl', 'mozAutoGainControl');

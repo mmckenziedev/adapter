@@ -20,7 +20,7 @@ export function shimRTCIceCandidate(window) {
   }
 
   const NativeRTCIceCandidate = window.RTCIceCandidate;
-  window.RTCIceCandidate = function(args) {
+  window.RTCIceCandidate = args => {
     // Remove the a= which shouldn't be part of the candidate string.
     if (typeof args === 'object' && args.candidate &&
         args.candidate.indexOf('a=') === 0) {
@@ -36,14 +36,12 @@ export function shimRTCIceCandidate(window) {
           parsedCandidate);
 
       // Add a serializer that does not serialize the extra attributes.
-      augmentedCandidate.toJSON = function() {
-        return {
-          candidate: augmentedCandidate.candidate,
-          sdpMid: augmentedCandidate.sdpMid,
-          sdpMLineIndex: augmentedCandidate.sdpMLineIndex,
-          usernameFragment: augmentedCandidate.usernameFragment,
-        };
-      };
+      augmentedCandidate.toJSON = () => ({
+        candidate: augmentedCandidate.candidate,
+        sdpMid: augmentedCandidate.sdpMid,
+        sdpMLineIndex: augmentedCandidate.sdpMLineIndex,
+        usernameFragment: augmentedCandidate.usernameFragment
+      });
       return augmentedCandidate;
     }
     return new NativeRTCIceCandidate(args);
@@ -77,7 +75,7 @@ export function shimMaxMessageSize(window) {
     });
   }
 
-  const sctpInDescription = function(description) {
+  const sctpInDescription = description => {
     if (!description || !description.sdp) {
       return false;
     }
@@ -90,7 +88,7 @@ export function shimMaxMessageSize(window) {
     });
   };
 
-  const getRemoteFirefoxVersion = function(description) {
+  const getRemoteFirefoxVersion = description => {
     // TODO: Is there a better solution for detecting Firefox?
     const match = description.sdp.match(/mozilla...THIS_IS_SDPARTA-(\d+)/);
     if (match === null || match.length < 2) {
@@ -101,7 +99,7 @@ export function shimMaxMessageSize(window) {
     return version !== version ? -1 : version;
   };
 
-  const getCanSendMaxMessageSize = function(remoteIsFirefox) {
+  const getCanSendMaxMessageSize = remoteIsFirefox => {
     // Every implementation we know can send at least 64 KiB.
     // Note: Although Chrome is technically able to send up to 256 KiB, the
     //       data does not reach the other peer reliably.
@@ -133,7 +131,7 @@ export function shimMaxMessageSize(window) {
     return canSendMaxMessageSize;
   };
 
-  const getMaxMessageSize = function(description, remoteIsFirefox) {
+  const getMaxMessageSize = (description, remoteIsFirefox) => {
     // Note: 65536 bytes is the default value from the SDP spec. Also,
     //       every implementation we know supports receiving 65536 bytes.
     let maxMessageSize = 65536;
@@ -312,9 +310,7 @@ export function removeAllowExtmapMixed(window) {
   const nativeSRD = window.RTCPeerConnection.prototype.setRemoteDescription;
   window.RTCPeerConnection.prototype.setRemoteDescription = function(desc) {
     if (desc && desc.sdp && desc.sdp.indexOf('\na=extmap-allow-mixed') !== -1) {
-      desc.sdp = desc.sdp.split('\n').filter((line) => {
-        return line.trim() !== 'a=extmap-allow-mixed';
-      }).join('\n');
+      desc.sdp = desc.sdp.split('\n').filter(line => line.trim() !== 'a=extmap-allow-mixed').join('\n');
     }
     return nativeSRD.apply(this, arguments);
   };

@@ -38,7 +38,7 @@ export function shimPeerConnection(window) {
 
   // shim away need for obsolete RTCIceCandidate/RTCSessionDescription.
   ['setLocalDescription', 'setRemoteDescription', 'addIceCandidate']
-      .forEach(function(method) {
+      .forEach(method => {
         const nativeMethod = window.RTCPeerConnection.prototype[method];
         window.RTCPeerConnection.prototype[method] = function() {
           arguments[0] = new ((method === 'addIceCandidate') ?

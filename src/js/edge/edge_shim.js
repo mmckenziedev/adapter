@@ -20,14 +20,10 @@ export function shimPeerConnection(window) {
 
   if (window.RTCIceGatherer) {
     if (!window.RTCIceCandidate) {
-      window.RTCIceCandidate = function(args) {
-        return args;
-      };
+      window.RTCIceCandidate = args => args;
     }
     if (!window.RTCSessionDescription) {
-      window.RTCSessionDescription = function(args) {
-        return args;
-      };
+      window.RTCSessionDescription = args => args;
     }
     // this adds an additional event listener to MediaStrackTrack that signals
     // when a tracks enabled property was changed. Workaround for a bug in
@@ -70,7 +66,7 @@ export function shimPeerConnection(window) {
 
   const RTCPeerConnectionShim = shimRTCPeerConnection(window,
       browserDetails.version);
-  window.RTCPeerConnection = function(config) {
+  window.RTCPeerConnection = config => {
     if (config && config.iceServers) {
       config.iceServers = filterIceServers(config.iceServers,
         browserDetails.version);

@@ -19,7 +19,7 @@ export function shimGetUserMedia(window) {
 
   const browserDetails = utils.detectBrowser(window);
 
-  const constraintsToChrome_ = function(c) {
+  const constraintsToChrome_ = c => {
     if (typeof c !== 'object' || c.mandatory || c.optional) {
       return c;
     }
@@ -32,7 +32,7 @@ export function shimGetUserMedia(window) {
       if (r.exact !== undefined && typeof r.exact === 'number') {
         r.min = r.max = r.exact;
       }
-      const oldname_ = function(prefix, name) {
+      const oldname_ = (prefix, name) => {
         if (prefix) {
           return prefix + name.charAt(0).toUpperCase() + name.slice(1);
         }
@@ -70,13 +70,13 @@ export function shimGetUserMedia(window) {
     return cc;
   };
 
-  const shimConstraints_ = function(constraints, func) {
+  const shimConstraints_ = (constraints, func) => {
     if (browserDetails.version >= 61) {
       return func(constraints);
     }
     constraints = JSON.parse(JSON.stringify(constraints));
     if (constraints && typeof constraints.audio === 'object') {
-      const remap = function(obj, a, b) {
+      const remap = (obj, a, b) => {
         if (a in obj && !(b in obj)) {
           obj[b] = obj[a];
           delete obj[a];
@@ -131,7 +131,7 @@ export function shimGetUserMedia(window) {
     return func(constraints);
   };
 
-  const shimError_ = function(e) {
+  const shimError_ = e => {
     if (browserDetails.version >= 64) {
       return e;
     }
@@ -157,7 +157,7 @@ export function shimGetUserMedia(window) {
     };
   };
 
-  const getUserMedia_ = function(constraints, onSuccess, onError) {
+  const getUserMedia_ = (constraints, onSuccess, onError) => {
     shimConstraints_(constraints, c => {
       navigator.webkitGetUserMedia(c, onSuccess, e => {
         if (onError) {
@@ -174,17 +174,15 @@ export function shimGetUserMedia(window) {
   if (navigator.mediaDevices.getUserMedia) {
     const origGetUserMedia = navigator.mediaDevices.getUserMedia.
         bind(navigator.mediaDevices);
-    navigator.mediaDevices.getUserMedia = function(cs) {
-      return shimConstraints_(cs, c => origGetUserMedia(c).then(stream => {
-        if (c.audio && !stream.getAudioTracks().length ||
-            c.video && !stream.getVideoTracks().length) {
-          stream.getTracks().forEach(track => {
-            track.stop();
-          });
-          throw new DOMException('', 'NotFoundError');
-        }
-        return stream;
-      }, e => Promise.reject(shimError_(e))));
-    };
+    navigator.mediaDevices.getUserMedia = cs => shimConstraints_(cs, c => origGetUserMedia(c).then(stream => {
+      if (c.audio && !stream.getAudioTracks().length ||
+          c.video && !stream.getVideoTracks().length) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        throw new DOMException('', 'NotFoundError');
+      }
+      return stream;
+    }, e => Promise.reject(shimError_(e))));
   }
 }

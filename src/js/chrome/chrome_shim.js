@@ -95,22 +95,22 @@ export function shimGetSendersWithDtmf(window) {
   if (typeof window === 'object' && window.RTCPeerConnection &&
       !('getSenders' in window.RTCPeerConnection.prototype) &&
       'createDTMFSender' in window.RTCPeerConnection.prototype) {
-    const shimSenderWithDtmf = function(pc, track) {
-      return {
-        track,
-        get dtmf() {
-          if (this._dtmf === undefined) {
-            if (track.kind === 'audio') {
-              this._dtmf = pc.createDTMFSender(track);
-            } else {
-              this._dtmf = null;
-            }
+    const shimSenderWithDtmf = (pc, track) => ({
+      track,
+
+      get dtmf() {
+        if (this._dtmf === undefined) {
+          if (track.kind === 'audio') {
+            this._dtmf = pc.createDTMFSender(track);
+          } else {
+            this._dtmf = null;
           }
-          return this._dtmf;
-        },
-        _pc: pc
-      };
-    };
+        }
+        return this._dtmf;
+      },
+
+      _pc: pc
+    });
 
     // augment addTrack when getSenders is not available.
     if (!window.RTCPeerConnection.prototype.getSenders) {
@@ -208,7 +208,7 @@ export function shimGetStats(window) {
       return origGetStats.apply(this, []);
     }
 
-    const fixChromeStats_ = function(response) {
+    const fixChromeStats_ = response => {
       const standardReport = {};
       const reports = response.result();
       reports.forEach(report => {
@@ -230,12 +230,10 @@ export function shimGetStats(window) {
     };
 
     // shim getStats with maplike support
-    const makeMapStats = function(stats) {
-      return new Map(Object.keys(stats).map(key => [key, stats[key]]));
-    };
+    const makeMapStats = stats => new Map(Object.keys(stats).map(key => [key, stats[key]]));
 
     if (arguments.length >= 2) {
-      const successCallbackWrapper_ = function(response) {
+      const successCallbackWrapper_ = response => {
         args[1](makeMapStats(fixChromeStats_(response)));
       };
 
@@ -246,7 +244,7 @@ export function shimGetStats(window) {
     // promise-support
     return new Promise((resolve, reject) => {
       origGetStats.apply(this, [
-        function(response) {
+        response => {
           resolve(makeMapStats(fixChromeStats_(response)));
         }, reject]);
     }).then(successCallback, errorCallback);
@@ -558,7 +556,7 @@ export function shimAddTrackRemoveTrack(window) {
       sdp
     });
   }
-  ['createOffer', 'createAnswer'].forEach(function(method) {
+  ['createOffer', 'createAnswer'].forEach(method => {
     const nativeMethod = window.RTCPeerConnection.prototype[method];
     window.RTCPeerConnection.prototype[method] = function() {
       const args = arguments;
@@ -661,7 +659,7 @@ export function shimPeerConnection(window) {
 
   // shim implicit creation of RTCSessionDescription/RTCIceCandidate
   ['setLocalDescription', 'setRemoteDescription', 'addIceCandidate']
-      .forEach(function(method) {
+      .forEach(method => {
         const nativeMethod = window.RTCPeerConnection.prototype[method];
         window.RTCPeerConnection.prototype[method] = function() {
           arguments[0] = new ((method === 'addIceCandidate') ?

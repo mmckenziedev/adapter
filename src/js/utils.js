@@ -186,7 +186,7 @@ export function compactObject(data) {
     return data;
   }
 
-  return Object.keys(data).reduce(function(accumulator, key) {
+  return Object.keys(data).reduce((accumulator, key) => {
     const isObject = typeof data[key] === 'object';
     const value = isObject ? compactObject(data[key]) : data[key];
     const isEmptyObject = isObject && !Object.keys(value).length;
